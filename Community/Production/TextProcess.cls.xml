@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Community.Production.TextProcess">
+<Description>
+1</Description>
+<ClassType>persistent</ClassType>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>Ens.BusinessProcessBPL</Super>
+<TimeCreated>64295,81711.228083</TimeCreated>
+
+<Property name="Words">
+<Description>
+Список слов, которые вызывают БО</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="EmailOperation">
+<Type>%String</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default><![CDATA[Words:Basic,EmailOperation:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}]]></Default>
+</Parameter>
+
+<XData name="BPL">
+<Description>
+BPL Definition</Description>
+<XMLNamespace>http://www.intersystems.com/bpl</XMLNamespace>
+<Data><![CDATA[
+<process language='objectscript' request='Ens.Request' response='Ens.Response'>
+<context>
+<property name='Id' type='%Integer'/>
+<property name="SendEmail" type='%Boolean' initialexpression='$$$NO'/>
+</context>
+<sequence>
+<assign property='context.Id' value='request.StringValue'/>
+<sql name='Проверяем есть ли слова из списка Word в посте'><![CDATA[
+SELECT 1 INTO :context.SendEmail FROM Community_Model.Post
+WHERE ID = :context.Id AND
+%ID %FIND search_index(TextIndex, :process.Words, 2)
+]]]]><![CDATA[> 
+</sql>
+
+<if condition='context.SendEmail = $$$YES'>
+<true>
+<call name='Oтправка почты' target='@..%Process.EmailOperation' async='0'>
+<request type='Ens.StringRequest'>
+<assign property="callrequest.StringValue" value='context.Id'/>
+</request>
+</call>
+</true>
+</if>
+</sequence>
+</process>
+]]></Data>
+</XData>
+
+<Method name="OnGetConnections">
+<Description>
+Return an array of connections for drawing lines on the config diagram</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pArray:%String,pItem:Ens.Config.Item</FormalSpec>
+<Implementation><![CDATA[	do ##class(isc.util.EnsUtils).getConnections("EmailOperation", pItem, .pArray)
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>TextProcessDefaultData</DefaultData>
+<Data name="TextProcessDefaultData">
+<Subscript>"TextProcess"</Subscript>
+<Value name="1">
+<Value>Words</Value>
+</Value>
+<Value name="2">
+<Value>EmailOperation</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

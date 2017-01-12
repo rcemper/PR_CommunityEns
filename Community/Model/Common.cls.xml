@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Community.Model.Common">
+<Abstract>1</Abstract>
+<IncludeCode>Community</IncludeCode>
+<TimeCreated>64279,57705.1082</TimeCreated>
+
+<Property name="Hash">
+<Type>%String</Type>
+</Property>
+</Class>
+</Export>

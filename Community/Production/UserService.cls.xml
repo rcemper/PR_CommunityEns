@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Community.Production.UserService">
+<Super>Ens.BusinessService</Super>
+<TimeCreated>64278,78373.235895</TimeCreated>
+
+<Parameter name="ADAPTER">
+<Default>EnsLib.SQL.InboundAdapter</Default>
+</Parameter>
+
+<Method name="OnProcessInput">
+<Description>
+Обработка одного ряда данных</Description>
+<FormalSpec>pInput:EnsLib.SQL.Snapshot,*pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#Dim Status As %Status = $$$OK
+	Set Uid = pInput.Get("UID")
+	Set Created = pInput.Get("Created")	
+	
+	Set FirstName = pInput.Get("field_first_name_value")
+	Set LastName = pInput.Get("field_last_name_value")
+	Set Company = pInput.Get("field_company_value")
+	Set Position = pInput.Get("field_title_position_value")
+	Set Email = pInput.Get("mail")
+	
+	/*
+	Set FirstName = pInput.Get("FirstName")
+	Set LastName = pInput.Get("LastName")
+	Set Company = pInput.Get("Company")
+	Set Position = pInput.Get("Position")
+	Set Email = pInput.Get("Email")*/
+	
+	Set Hash = ##class(Community.Utils.Hash).Hash(Uid, FirstName, LastName, Company, Position, Email, Created) 
+	If ##class(Community.Model.User).HashIndexExists(Hash)=$$$NO {
+		Set Status = ##class(Community.Model.User).Upsert(Uid, FirstName, LastName, Company, Position, Email, Created, Hash)
+	}
+	Quit Status
+]]></Implementation>
+</Method>
+</Class>
+</Export>

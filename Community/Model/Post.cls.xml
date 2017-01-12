@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Community.Model.Post">
+<Super>%Persistent,Community.Model.Common</Super>
+<TimeCreated>64279,60931.12667</TimeCreated>
+
+<Property name="Nid">
+<Type>%Integer</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="NidIndex">
+<Properties>Nid</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Type">
+<Type>%String</Type>
+<Parameter name="VALUELIST" value=",code_package,documentation,learning_track,video,post"/>
+</Property>
+
+<Property name="Tags">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="350"/>
+</Property>
+
+<Property name="Views">
+<Type>%Integer</Type>
+</Property>
+
+<Property name="AvgVote">
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="VotesAmount">
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Name">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="250"/>
+</Property>
+
+<Property name="Created">
+<Type>%TimeStamp</Type>
+</Property>
+
+<Property name="Published">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PublishedDate">
+<Type>%TimeStamp</Type>
+</Property>
+
+<Property name="Text">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Index name="TextIndex">
+<Properties>Text</Properties>
+<TypeClass>%iFind.Index.Basic</TypeClass>
+<Parameter name="INDEXOPTION" value="2"/>
+<Parameter name="LANGUAGE" value="en"/>
+<Parameter name="LOWER" value="1"/>
+</Index>
+
+<Property name="Link">
+<Type>%String</Type>
+<SqlComputeCode>set {*} = $$$Server _ "node/" _ {Nid}</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>%%INSERT</SqlComputeOnChange>
+<Parameter name="MAXLEN" value="150"/>
+</Property>
+
+<Index name="Link">
+<Properties>Link</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Index name="HashIndex">
+<Properties>Hash</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Author">
+<Type>Community.Model.User</Type>
+<Cardinality>one</Cardinality>
+<Inverse>Posts</Inverse>
+<Relationship>1</Relationship>
+<Required>1</Required>
+<OnDelete>cascade</OnDelete>
+</Property>
+
+<Index name="AuthorIndex">
+<Properties>Author</Properties>
+</Index>
+
+<Method name="Upsert">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Nid,Name,Created,Uid,Tags,Type,Views,AvgVote,VotesAmount,Text,Published,Hash</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#Dim Status As %Status = $$$OK
+ 	
+	If ..NidIndexExists(Nid, .Id) {
+		Set Post = ..%OpenId(Id)
+	} Else {
+		Set Post = ..%New()
+		Set Post.Nid = Nid
+		If ##class(Community.Model.User).UidIndexExists(Uid, .AuthorId) {
+			Do Post.AuthorSetObjectId(AuthorId)
+		}
+	}
+	
+	Set Post.Hash = Hash
+	Set Post.Name = Name
+	Set Post.Created = Created
+	Set Post.Tags = Tags
+	Set Post.Views = Views
+	Set Post.AvgVote = AvgVote
+	Set Post.VotesAmount = VotesAmount
+	Set Post.Text = ..CleanText(Text)
+	Set Post.Type = Type
+
+	If (Post.Published '= Published) {
+		If Published {
+			Set Post.PublishedDate = $ZDT($H, 3)	
+		} Else {
+			Set Post.PublishedDate = ""
+		}		
+		Set Post.Published = Published
+	}
+	
+	Set Status = Post.%Save()
+	
+	Return Status
+]]></Implementation>
+</Method>
+
+<Method name="CleanText">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Text:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Text = $Replace(Text,"</p>"," ")
+	Set Reg = ##class(%Regex.Matcher).%New("<(([^>]|\n)*)>")
+	Set Reg.Text = Text
+	Set Text = Reg.ReplaceAll("")
+	Set Text = $Replace(Text,"&nbsp;"," ")
+	Set Text = $Replace(Text,"&gt;",">")
+	Set Text = $Replace(Text,"&lt;","<")
+	Set Text = $Replace(Text,"&amp;","&")
+	Set Text = $Replace(Text,"&quot;","""")
+	Set Text = $Replace(Text,"&#39;","'")
+	Return Text
+]]></Implementation>
+</Method>
+
+<Method name="WriteInfo">
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Info = "Author: " _ ..Author.Name _ $$$NL _
+				"URL: " _ ..Link _ $$$NL _ 
+				"Text: " _ ..Text
+	Return Info
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Community.Model.PostD</DataLocation>
+<DefaultData>PostDefaultData</DefaultData>
+<IdLocation>^Community.Model.PostD</IdLocation>
+<IndexLocation>^Community.Model.PostI</IndexLocation>
+<StreamLocation>^Community.Model.PostS</StreamLocation>
+<Data name="PostDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Hash</Value>
+</Value>
+<Value name="3">
+<Value>Type</Value>
+</Value>
+<Value name="4">
+<Value>Tags</Value>
+</Value>
+<Value name="5">
+<Value>Views</Value>
+</Value>
+<Value name="6">
+<Value>AvgVote</Value>
+</Value>
+<Value name="7">
+<Value>VotesAmount</Value>
+</Value>
+<Value name="8">
+<Value>Name</Value>
+</Value>
+<Value name="9">
+<Value>Created</Value>
+</Value>
+<Value name="10">
+<Value>Published</Value>
+</Value>
+<Value name="11">
+<Value>PublishedDate</Value>
+</Value>
+<Value name="12">
+<Value>Deleted</Value>
+</Value>
+<Value name="13">
+<Value>Text</Value>
+</Value>
+<Value name="14">
+<Value>Link</Value>
+</Value>
+<Value name="15">
+<Value>Author</Value>
+</Value>
+<Value name="16">
+<Value>PostType</Value>
+</Value>
+<Value name="17">
+<Value>Nid</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

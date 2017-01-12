@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Community.Utils.Hash">
+<TimeCreated>64279,56979.001049</TimeCreated>
+
+<Method name="Hash">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Arg...</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set Delimiter = $c(255)
+	Set String = Delimiter
+	For i=1:1:Arg {
+		Set String = String _ Arg(i) _ Delimiter
+	}
+	Return $System.Encryption.Base64Encode($system.Encryption.MD5Hash(String))
+]]></Implementation>
+</Method>
+</Class>
+</Export>

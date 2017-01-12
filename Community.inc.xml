@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="Community" type="INC"><![CDATA[
+#Define Server "https://community.intersystems.com/"
+#Define Pool ^Community.Pool 
+]]></Routine>
+</Export>

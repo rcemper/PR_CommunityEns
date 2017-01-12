@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Community.Production.EmailOperation">
+<Super>Ens.BusinessOperation</Super>
+<TimeCreated>64295,83951.202754</TimeCreated>
+
+<Parameter name="ADAPTER">
+<Default>EnsLib.EMail.OutboundAdapter</Default>
+</Parameter>
+
+<Method name="SendMail">
+<FormalSpec>Request:Ens.StringRequest,*Response:Ens.StringResponse</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#Dim Status As %Status = $$$OK
+
+	Set Id = Request.StringValue
+	Set Post = ##class(Community.Model.Post).%OpenId(Id)
+
+	Set Mail=##class(%Net.MailMessage).%New()
+	Set Mail.Subject = "Message alert: " _ Post.Name
+	Set Mail.Charset = "utf-8"
+	Set Mail.IsHTML = $$$NO
+	//Set Mail.ContentType = "text/html"
+	Do Mail.TextData.Write(Post.WriteInfo())
+
+	Set ..Adapter.SMTP.UseSTARTTLS = $$$YES   
+	Set Status = ..Adapter.SendMail(Mail)
+	Return Status
+]]></Implementation>
+</Method>
+
+<XData name="MessageMap">
+<Data><![CDATA[
+<MapItems>
+  <MapItem MessageType="Ens.Request">
+    <Method>SendMail</Method>
+  </MapItem>
+</MapItems>
+]]></Data>
+</XData>
+</Class>
+</Export>

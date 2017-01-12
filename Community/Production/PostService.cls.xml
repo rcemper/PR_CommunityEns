@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Community.Production.PostService">
+<Super>Ens.BusinessService</Super>
+<TimeCreated>64279,61220.830131</TimeCreated>
+
+<Parameter name="ADAPTER">
+<Default>EnsLib.SQL.InboundAdapter</Default>
+</Parameter>
+
+<Method name="OnProcessInput">
+<Description>
+Обработка одного ряда данных</Description>
+<FormalSpec>pInput:EnsLib.SQL.Snapshot,*pOutput:%RegisteredObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#Dim Status As %Status = $$$OK
+	//m ^dbg("d") = @pInput.%GblRef
+	
+	Set Nid = pInput.Get("entity_id")
+	Set Name = pInput.Get("title")
+	Set Created = pInput.Get("Created")
+	Set Uid = pInput.Get("uid")
+	Set Tags = pInput.Get("Tags")
+	Set Type = pInput.Get("bundle")
+	Set Views = pInput.Get("Views")
+	Set AvgVote = pInput.Get("AvgVote")
+	Set VotesAmount = pInput.Get("VotesAmount")
+	Set Text = pInput.Get("field_body_value")
+	Set Published = pInput.Get("status")
+	
+	Set Hash = ##class(Community.Utils.Hash).Hash(Nid, Name, Created, Uid, Tags, Type, Views, AvgVote, VotesAmount, Text, Published) 
+	If ##class(Community.Model.Post).HashIndexExists(Hash)=$$$NO {
+		Set Status = ##class(Community.Model.Post).Upsert(Nid, Name, Created, Uid, Tags, Type, Views, AvgVote, VotesAmount, Text, Published, Hash)
+	}
+	
+	Quit Status
+]]></Implementation>
+</Method>
+</Class>
+</Export>

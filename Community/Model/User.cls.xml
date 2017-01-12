@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Community.Model.User">
+<Super>%Persistent,Community.Model.Common</Super>
+<TimeCreated>64278,81062.657056</TimeCreated>
+
+<Property name="Uid">
+<Type>%Integer</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="UidIndex">
+<Properties>Uid</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Name">
+<Type>%String</Type>
+<SqlComputeCode>set {*} = {FirstName} _ " " _ {LastName}</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>FirstName,LastName</SqlComputeOnChange>
+<Parameter name="MAXLEN" value="255"/>
+</Property>
+
+<Property name="FirstName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="255"/>
+</Property>
+
+<Property name="LastName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="255"/>
+</Property>
+
+<Property name="Email">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="255"/>
+</Property>
+
+<Property name="Company">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="255"/>
+</Property>
+
+<Property name="Position">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="255"/>
+</Property>
+
+<Property name="Created">
+<Type>%TimeStamp</Type>
+</Property>
+
+<Property name="Link">
+<Type>%String</Type>
+<SqlComputeCode>set {*} = $$$Server _ "user/" _ {Uid}</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>%%INSERT</SqlComputeOnChange>
+<Parameter name="MAXLEN" value="255"/>
+</Property>
+
+<Index name="LinkIndex">
+<Properties>Link</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Index name="HashIndex">
+<Properties>Hash</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Posts">
+<Type>Community.Model.Post</Type>
+<Cardinality>many</Cardinality>
+<Inverse>Author</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Method name="Upsert">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Uid,FirstName,LastName,Company,Position,Email,Created,Hash</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#Dim Status As %Status = $$$OK
+
+	If ..UidIndexExists(Uid, .Id) {
+		Set User = ..%OpenId(Id)
+	} Else {
+		Set User = ..%New()
+		Set User.Uid = Uid
+		Set User.Created = Created
+	}
+
+	Set User.FirstName = FirstName
+	Set User.LastName = LastName
+	Set User.Email = $ZCVT(Email, "l")
+	Set User.Company = Company
+	Set User.Position = Position
+	Set User.Hash = Hash
+	
+	Set Status = User.%Save()
+	Return Status
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Community.Model.UserD</DataLocation>
+<DefaultData>UserDefaultData</DefaultData>
+<IdLocation>^Community.Model.UserD</IdLocation>
+<IndexLocation>^Community.Model.UserI</IndexLocation>
+<StreamLocation>^Community.Model.UserS</StreamLocation>
+<Data name="UserDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Hash</Value>
+</Value>
+<Value name="3">
+<Value>Name</Value>
+</Value>
+<Value name="4">
+<Value>FirstName</Value>
+</Value>
+<Value name="5">
+<Value>LastName</Value>
+</Value>
+<Value name="6">
+<Value>Email</Value>
+</Value>
+<Value name="7">
+<Value>Company</Value>
+</Value>
+<Value name="8">
+<Value>Position</Value>
+</Value>
+<Value name="9">
+<Value>Created</Value>
+</Value>
+<Value name="10">
+<Value>Link</Value>
+</Value>
+<Value name="11">
+<Value>Uid</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>
