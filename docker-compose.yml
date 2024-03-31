@@ -2,7 +2,7 @@ version: '3.6'
 services:
   iris:
     image: intersystemsdc/iris-community
-    restart: always
+    restart: always   
     command: -a /home/irisowner/dev/ascript.sh
 
     ports: 
